@@ -90,8 +90,9 @@ if __name__ == "__main__":
     
     x_train = np.asarray(x_train,dtype=np.float32)
     y_train = np.asarray(y_train, dtype='int32')-1
-#    x_train, x_test, y_train, y_test = cross_validation.train_test_split(
-#                      x_train, y_train, test_size=0.1, random_state=42)
+    
+    x_train, x_test, y_train, y_test = cross_validation.train_test_split(
+                      x_train, y_train, test_size=0.1, random_state=42)
     
     clf = NeuralNet(
         layers=[('input',layers.InputLayer),                
@@ -106,16 +107,16 @@ if __name__ == "__main__":
         # layer parameters:
         batch_iterator_train=BatchIterator(batch_size=512),
         input_shape=(None, x_train.shape[1]),  # 96x96 input pixels per batch
-        hidden0_num_units=512,  # number of units in hidden layer
-        hidden1_num_units=512,  # number of units in hidden layer
-#        hidden2_num_units=2048,  # number of units in hidden layer
+        hidden0_num_units=1024,  # number of units in hidden layer
+        hidden1_num_units=1024,  # number of units in hidden layer
+        hidden2_num_units=1024,  # number of units in hidden layer
 #        hidden3_num_units=256,  # number of units in hidden layer
         output_nonlinearity=softmax,  # output layer uses identity function
         output_num_units=len(set(y_train)),  # 30 target values
         dropout0_p=0.5,
         dropout1_p=0.5,
         eval_size=.2,
-#        dropout2_p=0.5,
+        dropout2_p=0.5,
         # optimization method:
 #        update=adagrad,
 #        update_learning_rate=.1,
@@ -124,18 +125,18 @@ if __name__ == "__main__":
         update_momentum=theano.shared(np.float32(0.9)),
 #        
         on_epoch_finished=[
-            AdjustVariable('update_learning_rate', start=0.01, stop=0.0001),
+            AdjustVariable('update_learning_rate', start=0.01, stop=0.00001),
             AdjustVariable('update_momentum', start=0.9, stop=0.999),
             ],
         regression=False,  # flag to indicate we're dealing with regression problem
-        max_epochs=300,  # we want to train this many epochs
+        max_epochs=100,  # we want to train this many epochs
         verbose=1        
         )                 
 #    clf = dbn([x_train.shape[1],1024,1024,256,len(set(y_train))])      
 
     clf.fit(x_train,y_train)          
     
-    if 0:
+    if 1:
         y_pred = clf.predict(x_test)
         print "Accuracy:", zero_one_loss(y_test, y_pred)
         print "Classification report:"

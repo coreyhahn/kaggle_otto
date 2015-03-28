@@ -28,14 +28,14 @@ def ada_boost_search():
     x_train = np.asarray(x_train,dtype=np.float32)
     y_train = np.asarray(y_train, dtype='int32')-1   
     
-    xopt = scipy.optimize.fmin(func=minfunc_wrapper, x0=[1,.1,1],args=(x_train,y_train),disp=True,retall=True,xtol=.5)
+    xopt = scipy.optimize.fmin(func=minfunc_wrapper, x0=[1,.1,1],args=(x_train,y_train),disp=True,retall=True,xtol=[1,.02,1])
     
     print xopt
 
 def minfunc_wrapper(x,*args):
     [nest,lr,md] = x
-    nest = np.int32(nest*20)
-    md = np.int32(md*8)
+    nest = np.int32(np.round(20**nest))
+    md = np.int32(np.round(md*8))
     x_train = args[0]
     y_train = args[1]
     clf = GradientBoostingClassifier(n_estimators=nest, learning_rate=lr, max_depth=md, random_state=0)
