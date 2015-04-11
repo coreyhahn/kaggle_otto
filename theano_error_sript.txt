@@ -1,0 +1,2 @@
+sudo THEANO_FLAGS=mode=FAST_COMPILE theano-nose theano/tensor/tests/test_basic.py:MulTester.test_goo
+

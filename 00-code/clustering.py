@@ -7,6 +7,7 @@ Created on Fri Mar 27 17:25:55 2015
 
 from sklearn.cluster import AffinityPropagation
 from sklearn.cluster import DBSCAN
+from sklearn.cluster import MiniBatchKMeans
 from sklearn import cross_validation
 import cPickle
 from sklearn import metrics
@@ -15,7 +16,35 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 import time
+from sklearn.metrics import silhouette_score
 
+
+def kmeans_test():
+    
+    savefile = open('traindata.pkl', 'rb')
+    (x_train, y_train, t1) = cPickle.load(savefile)
+    savefile.close()
+#    x_train, t1, y_train, t2 = cross_validation.train_test_split(
+#        x_train, y_train, test_size=0.10, random_state=42)   
+    savefile = open('testdata.pkl', 'rb')
+    (x_test, t1, name1) = cPickle.load(savefile)
+    savefile.close()
+    
+    for clus in np.arange(2,100):
+#        clus = 1000
+        mbk = MiniBatchKMeans(init='k-means++', n_clusters=clus, batch_size=128,
+                          n_init=10, max_no_improvement=10, verbose=0)
+        mbk.fit(x_train)
+        silhouette_avg = silhouette_score(x_train, mbk.labels_)
+        print (clus,silhouette_avg)
+    
+    data1 = mbk.labels_
+    filename = 'train_kmeans' + str(clus)
+    savefile = open(filename+'.pkl', 'wb')
+    cPickle.dump((data1, [], []),savefile,-1)
+    savefile.close()     
+    
+    
 def affin_test():
     savefile = open('traindata.pkl', 'rb')
     (x_train, y_train, t1) = cPickle.load(savefile)
@@ -60,7 +89,10 @@ def dbscan_test():
     x_train = norm1.transform(x_train)
     x_test = norm1.transform(x_test)
     
-    db = DBSCAN(eps=2, min_samples=5).fit(x_train)
+    x_t1 = np.vstack((x_train, x_test))
+    
+    eps1=7
+    db = DBSCAN(eps=eps1, min_samples=5).fit(x_t1)
     
     core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
     core_samples_mask[db.core_sample_indices_] = True
@@ -83,7 +115,12 @@ def dbscan_test():
 #          % metrics.adjusted_mutual_info_score(labels_true, labels))
 #    print("Silhouette Coefficient: %0.3f"
 #          % metrics.silhouette_score(x_train, labels))  
-        
+    
+    data1 = labels[:x_train.shape[0]]
+    filename = 'traindbscan' + str(eps1)
+    savefile = open(filename+'.pkl', 'wb')
+    cPickle.dump((data1, [], []),savefile,-1)
+    savefile.close()           
 
 def tsne_test():  
     savefile = open('traindata.pkl', 'rb')
@@ -104,9 +141,9 @@ def tsne_test():
         
 if __name__ == '__main__':
 #    tsne_test()
-    dbscan_test()        
+#    dbscan_test()        
 #    affin_test()    
-        
+    kmeans_test()
         
         
         
